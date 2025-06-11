@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AttendEase - Prototype</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 0; }
+    header, footer { background-color: #005f73; color: white; padding: 1rem; text-align: center; }
+    nav a { margin: 0 1rem; color: white; text-decoration: none; }
+    section { padding: 2rem; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    label { display: block; margin: 1rem 0 0.5rem; }
+    input, select, textarea { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
+    button { background-color: #0a9396; color: white; padding: 0.7rem 1.2rem; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background-color: #007b7f; }
+    .log-entry { border-bottom: 1px solid #ccc; padding: 0.5rem 0; }
+    canvas { display: block; margin: 1rem auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AttendEase</h1>
+    <p>Prototype - Employee Attendance System</p>
+    <nav>
+      <a href="#clock">Clock In/Out</a>
+      <a href="#leave">Leave Request</a>
+      <a href="#report">Attendance Report</a>
+      <a href="#qr-code">QR Attendance</a>
+    </nav>
+  </header>
+
+  <section id="clock" class="container">
+    <h2>Clock In / Clock Out</h2>
+    <label for="employee">Employee Name</label>
+    <input type="text" id="employee" placeholder="Enter your name" />
+    <button onclick="clockIn()">Clock In</button>
+    <button onclick="clockOut()">Clock Out</button>
+    <div id="clock-log"></div>
+  </section>
+
+  <section id="leave" class="container">
+    <h2>Leave Request</h2>
+    <label for="leave-name">Name</label>
+    <input type="text" id="leave-name" />
+    <label for="leave-type">Leave Type</label>
+    <select id="leave-type">
+      <option>Sick Leave</option>
+      <option>Annual Leave</option>
+      <option>Emergency Leave</option>
+    </select>
+    <label for="leave-reason">Reason</label>
+    <textarea id="leave-reason" rows="3"></textarea>
+    <button onclick="submitLeave()">Submit Request</button>
+    <div id="leave-log"></div>
+  </section>
+
+  <section id="report" class="container">
+    <h2>Attendance Report</h2>
+    <button onclick="generateReport()">Generate Report</button>
+    <div id="report-log"></div>
+  </section>
+
+  <section id="qr-code" class="container">
+    <h2>QR Code Attendance</h2>
+    <p>Employees can scan the QR code below to mark their attendance.</p>
+    <canvas id="qrCanvas"></canvas>
+    <p><button onclick="generateQRCode()">Regenerate QR Code</button></p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 AttendEase | EfficientSoft</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const clockLog = document.getElementById("clock-log");
+    const leaveLog = document.getElementById("leave-log");
+    const reportLog = document.getElementById("report-log");
+    const attendanceData = [];
+    const leaveRequests = [];
+
+    function clockIn() {
+      const name = document.getElementById("employee").value;
+      const time = new Date().toLocaleTimeString();
+      if (!name) return alert("Please enter your name.");
+      attendanceData.push({ name, action: "Clocked In", time });
+      clockLog.innerHTML += `<div class='log-entry'>${name} Clocked In at ${time}</div>`;
+    }
+
+    function clockOut() {
+      const name = document.getElementById("employee").value;
+      const time = new Date().toLocaleTimeString();
+      if (!name) return alert("Please enter your name.");
+      attendanceData.push({ name, action: "Clocked Out", time });
+      clockLog.innerHTML += `<div class='log-entry'>${name} Clocked Out at ${time}</div>`;
+    }
+
+    function submitLeave() {
+      const name = document.getElementById("leave-name").value;
+      const type = document.getElementById("leave-type").value;
+      const reason = document.getElementById("leave-reason").value;
+      if (!name || !reason) return alert("Please complete all fields.");
+      leaveRequests.push({ name, type, reason, status: "Pending" });
+      leaveLog.innerHTML += `<div class='log-entry'>${name} requested ${type} leave. Status: Pending.</div>`;
+    }
+
+    function generateReport() {
+      reportLog.innerHTML = '<h3>Attendance Records</h3>' + attendanceData.map(entry => `
+        <div class='log-entry'>${entry.name} ${entry.action} at ${entry.time}</div>`).join("");
+    }
+
+    function generateQRCode() {
+      const canvas = document.getElementById("qrCanvas");
+      const timestamp = new Date().getTime();
+      const data = `attendance-token-${timestamp}`;
+      QRCode.toCanvas(canvas, data, { width: 200 }, function (error) {
+        if (error) console.error(error);
+        console.log("QR Code generated:", data);
+      });
+    }
+
+    generateQRCode();
+  </script>
+</body>
+</html>
